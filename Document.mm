@@ -349,15 +349,15 @@ enum ViewType
     [nc addObserver:weakSelf
            selector:@selector(handleDataTreeDidChange:) 
                name:MVDataTreeDidChangeNotification
-             object:nil]; 
-    */
+             object:nil];
+     
     [nc addObserver:weakSelf
            selector:@selector(handleDataTreeChanged:) 
                name:MVDataTreeChangedNotification
              object:nil]; 
     
     [nc addObserver:weakSelf
-           selector:@selector(handleDataTableChanged:) 
+           selector:@selector(handleDataTableChanged:)
                name:MVDataTableChangedNotification
              object:nil]; 
 
@@ -365,6 +365,18 @@ enum ViewType
            selector:@selector(handleThreadStateChanged:) 
                name:MVThreadStateChangedNotification
              object:nil];
+     */
+      [[NSNotificationCenter defaultCenter] addObserverForName:MVDataTreeChangedNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
+          [weakSelf handleDataTreeChanged:note];
+      }];
+      
+      [[NSNotificationCenter defaultCenter] addObserverForName:MVDataTableChangedNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
+          [weakSelf handleDataTableChanged:note];
+      }];
+      
+      [[NSNotificationCenter defaultCenter] addObserverForName:MVThreadStateChangedNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
+          [weakSelf handleThreadStateChanged:note];
+      }];
   }
   return self;
 }
