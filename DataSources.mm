@@ -64,10 +64,12 @@ NSString * const MVScannerErrorMessage  = @"NSScanner error";
   
   MVNode * node = item;
   
+#ifndef MV_NO_ARCHIVER
   if (node.details != nil && node.detailsOffset == 0)
   {
     return [@"*" stringByAppendingString:node.caption];
   }
+#endif
   
   return node.caption;
 }

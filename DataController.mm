@@ -611,6 +611,7 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
 //----------------------------------------------------------------------------
 - (void) applyFilter: (NSString *)filter
 {
+    NSLog(@"tomasszhang applyFilter tableLock lock %@", self);
   [tableLock lock];
   if (filter == nil || [filter length] == 0)
   {
@@ -649,12 +650,15 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
       }
     }
   }
+    
+    NSLog(@"tomasszhang applyFilter tableLock unlock %@", self);
   [tableLock unlock];
 }
 
 //----------------------------------------------------------------------------
 - (void)sortByOffset
 {
+    NSLog(@"tomasszhang applyFilter tableLock lock %@", self);
   [tableLock lock];
   [rows sortWithOptions:NSSortStable usingComparator:^(id obj1, id obj2)   
    {
@@ -664,6 +668,7 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
      if (row1.offset > row2.offset) return (NSComparisonResult)NSOrderedDescending;
      return (NSComparisonResult)NSOrderedSame;
    }];
+    NSLog(@"tomasszhang applyFilter tableLock unlock %@", self);
   [tableLock unlock]; 
 }
 
@@ -1225,6 +1230,11 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
   return nil;
 }
 
+- (void)dealloc
+{
+    NSLog(@"tomasszhang MVArchiver dealloced");
+}
+
 //-----------------------------------------------------------------------------
 -(id) initWithPath:(NSString *)path
 {  
@@ -1244,7 +1254,9 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
     fputs("!<MachoViewSwapFile 1.0>\n", pFile); // header for versioning
     fclose(pFile);
     
-    saverLock = [[NSLock alloc] init];
+    saverLock = [[NSRecursiveLock alloc] init];
+      
+      NSLog(@"tomasszhang saverLock init %@ lock %@", self, saverLock);
 
 #ifndef MV_NO_ARCHIVER
     saverThread = [[NSThread alloc] initWithTarget:self selector:@selector(doSave) object:nil];
@@ -1264,12 +1276,14 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
 //-----------------------------------------------------------------------------
 -(void) suspend
 {
+    NSLog(@"tomasszhang suspend saverLock lock %@", self);
   [saverLock lock];
 }
 
 //-----------------------------------------------------------------------------
 -(void) resume
 {
+    NSLog(@"tomasszhang resume saverLock unlock %@", self);
   [saverLock unlock];
 }
 
@@ -1285,8 +1299,10 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
 {
   NSParameterAssert([object conformsToProtocol:@protocol(MVSerializing)] == YES);
   
+    NSLog(@"tomasszhang addObjectToSave saverLock lock %@", self);
   [saverLock lock];
   [objectsToSave addObject:object];
+    NSLog(@"tomasszhang addObjectToSave saverLock unlock %@", self);
   [saverLock unlock];
   
   // if the background saver thread has been cancelled, then do do one cycle manually
@@ -1309,7 +1325,8 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
         
       FILE * pFile = fopen(CSTRING(swapPath), "a+");
       if (pFile != NULL)
-      { 
+      {
+          NSLog(@"tomasszhang doSave saverLock lock %@", self);
         [saverLock lock];
 
 #if DEBUG
@@ -1328,7 +1345,8 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
         
         // reset buffer
         objectsToSave = [[NSMutableArray alloc] init];
-
+          
+          NSLog(@"tomasszhang doSave saverLock lock %@", self);
         [saverLock unlock];
       }
 

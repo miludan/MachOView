@@ -178,7 +178,7 @@ struct MVNodeSaver;
   NSString *            swapPath;
   NSMutableArray *      objectsToSave; // conforms MVSerializing
   NSThread *            saverThread;
-  NSLock *              saverLock;
+  NSRecursiveLock *     saverLock;
 }
 
 @property (nonatomic,readonly)  NSString * swapPath;

@@ -52,7 +52,10 @@
       
     NSString *swapPath = [NSString stringWithFormat:@"%s.%@", swapFilePath, [[dataController fileName] lastPathComponent]];
     free(swapFilePath);
+      
+#ifndef MV_NO_ARCHIVER
     archiver = [MVArchiver archiverWithPath:swapPath];
+#endif
   }
   return self;
 }

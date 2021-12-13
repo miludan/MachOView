@@ -8,7 +8,7 @@
 
 
 //#define MV_NO_MULTITHREAD
-//#define MV_NO_ARCHIVER
+#define MV_NO_ARCHIVER
 //#define MV_STATISTICS
 
 extern NSCondition * pipeCondition;
